@@ -6,37 +6,44 @@ const bot = new telegram_api(token, {polling: true})
 
 const chats = {}
 
-const game_options = {
-    reply_markup: JSON.stringify({
-        inline_keyboard: [
-            [{text: "1", callback_data: "1"}, {text: "2", callback_data: "2"}, {text: "3", callback_data: "3"}],
-            [{text: "4", callback_data: "4"}, {text: "5", callback_data: "5"}, {text: "6", callback_data: "6"}],
-            [{text: "7", callback_data: "7"}, {text: "8", callback_data: "8"}, {text: "9", callback_data: "9"}],
-            [{text: "0", callback_data: "0"}]
-        ]
-    })
-}
+bot.on("message", async msg => {
+    const chat_id = msg.chat.id
 
-const again_option = {
-    reply_markup: JSON.stringify({
-        inline_keyboard: [
-            [{text: "Попробовать еще раз", callback_data: "/again"}]
-        ]
-    })
-}
-
+    if(msg.text === 'Закрыть'){
+        await bot.sendMessage(chat_id, 'Закрываю клавиатуру', {
+            reply_markup: {
+                remove_keyboard: true
+            }
+        })
+    }else if(msg.text === 'Ответить') {
+        await bot.sendMessage(chat_id, 'Отвечаю', {
+            reply_markup: {
+                force_reply: true
+            }
+        })
+    }
+    else{
+        await bot.sendMessage(chat_id, "Клавиатура", {
+            reply_markup: {
+                keyboard: [
+                    [{
+                        text: 'Отправить местоположение',
+                        request_location: true
+                    }],
+                    ['Ответить', 'Закрыть'],
+                    [{
+                        text: 'Отправить контакт',
+                        request_contact: true
+                    }]
+                ]
+            }
+        })
+    }
+})
 bot.setMyCommands([
     {command: "/start", description: "Приветствие"},
-    {command: "/game", description: "Небольшая игра"}
     ]
 )
-
-const start_game = async (chat_id) => {
-    await bot.sendMessage(chat_id, `Сейчас я загадаю цифру от 0 до 9, а ты попробуй угадать ее!`)
-    const randomNumber = Math.floor(Math.random() * 10)
-    chats[chat_id] = randomNumber;
-    await bot.sendMessage(chat_id, "Загадал! А теперь отгадывай!", game_options)
-}
 
 const start = () => {
     bot.on("message", async msg => {
@@ -45,27 +52,7 @@ const start = () => {
         if (msg.text === "/start") {
             return bot.sendMessage(chat_id, `Рад приветствовать, ${msg.from.first_name} ${msg.from.last_name}!`)
         }
-        if (msg.text === "/game") {
-            return start_game(chat_id);
-        }
-        return bot.sendMessage(chat_id, "Прости, но я не понимаю тебя")
-    })
-
-    bot.on("callback_query", async msg => {
-        const data = msg.data;
-        const chat_id = msg.message.chat.id;
-
-        if(data === "/again"){
-            return start_game(chat_id);
-        }
-
-        if(data === chats[chat_id]){
-            return bot.sendMessage(chat_id, `Поздравляю! Ты угадал! Это была цифра ${chats[chat_id]}`, again_option)
-        }
-        else{
-            return bot.sendMessage(chat_id, `К сожалению ты не угадал! Я загадывал цифру ${chats[chat_id]}`, again_option)
-        }
-
+        //return bot.sendMessage(chat_id, "Прости, но я не понимаю тебя")
     })
 }
 
