@@ -1,6 +1,6 @@
 const telegram_api = require("node-telegram-bot-api")
 
-const token = "TOKEN";
+const token = "5196554118:AAFmp2s9bujMiB33RV0edCLBU98MPij1R_o"
 
 const bot = new telegram_api(token, {polling: true})
 
@@ -16,27 +16,14 @@ const keyboard = {
     }
 }
 
-const games = {
-    reply_markup: {
-        inline_keyboard: [
-            [{text: "Snake", callback_data: "SnakeGame"}]
-        ]
-    }
-}
-
 const bot_buttons = () => {
 
     bot.on("message", async msg => {
         const chat_id = msg.chat.id
 
-        switch(msg.text) {
-            case "/start":
-                await bot.sendMessage(chat_id, `Рад приветствовать, ${msg.from.first_name} ${msg.from.last_name}!`)
-                await bot.sendMessage(chat_id, "Открываю меню", keyboard)
-                break
-            case "Меню игр":
-                await bot.sendMessage(chat_id, "Доступны следующие игры:", games)
-                break
+        if (msg.text === "/start") {
+            await bot.sendMessage(chat_id, `Рад приветствовать, ${msg.from.first_name} ${msg.from.last_name}!`)
+            await bot.sendMessage(chat_id, "Открываю меню", keyboard)
         }
     })
 }
